@@ -18,14 +18,36 @@ import org.github.wks.jhql.query.TextQueryer;
 public class JsonQueryerFactory {
 	private static ObjectMapper objectMapper = new ObjectMapper();
 
-	public static Queryer makeQueryer(File file) throws JsonParseException,
-			JsonMappingException, IOException {
-		return makeQueryer(objectMapper.readValue(file, Object.class));
+	public static Queryer makeQueryer(File file) throws QueryerFactoryException {
+		Object queryExpr;
+		try {
+			queryExpr = objectMapper.readValue(file, Object.class);
+		} catch (Exception e) {
+			throw new QueryerFactoryException(e);
+		}
+		return makeQueryer(queryExpr);
 	}
 
 	public static Queryer makeQueryer(InputStream inputStream)
-			throws JsonParseException, JsonMappingException, IOException {
-		return makeQueryer(objectMapper.readValue(inputStream, Object.class));
+			throws QueryerFactoryException {
+		Object queryExpr;
+		try {
+			queryExpr = objectMapper.readValue(inputStream, Object.class);
+		} catch (Exception e) {
+			throw new QueryerFactoryException(e);
+		}
+		return makeQueryer(queryExpr);
+	}
+
+	public static Queryer makeQueryer(String jsonString)
+			throws QueryerFactoryException {
+		Object queryExpr;
+		try {
+			queryExpr = objectMapper.readValue(jsonString, Object.class);
+		} catch (Exception e) {
+			throw new QueryerFactoryException(e);
+		}
+		return makeQueryer(queryExpr);
 	}
 
 	public static Queryer makeQueryer(Object queryExpr) {

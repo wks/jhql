@@ -5,6 +5,12 @@ import org.jaxen.JaxenException;
 import org.jaxen.dom.DOMXPath;
 import org.w3c.dom.Node;
 
+/**
+ * A Queryer for String results.
+ * <p>
+ * It makes an XPath query on a DOM node and returns the concatenated text
+ * contents in all matching nodes.
+ */
 public class TextQueryer implements Queryer {
 	private DOMXPath xPath;
 
@@ -25,7 +31,7 @@ public class TextQueryer implements Queryer {
 			for (Node n : results) {
 				sb.append(n.getTextContent());
 			}
-			
+
 			return sb.toString();
 		} catch (JaxenException e) {
 			throw new ParsingException("Error selecting " + xPath + " on "

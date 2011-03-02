@@ -2,6 +2,7 @@ package org.github.wks.jhql.factory;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,42 +13,79 @@ import org.github.wks.jhql.query.ObjectQueryer;
 import org.github.wks.jhql.query.Queryer;
 import org.github.wks.jhql.query.TextQueryer;
 
+/**
+ * A factory class that generates Queryer objects from JSON documents.
+ */
 public class JsonQueryerFactory {
 	private static ObjectMapper objectMapper = new ObjectMapper();
 
-	public static Queryer makeQueryer(File file) throws QueryerFactoryException {
+	/**
+	 * Make a Queryer from a File containing a JSON value.
+	 */
+	public static Queryer makeQueryer(File json) throws JsonException,
+			JhqlJsonGrammarException {
 		Object queryExpr;
 		try {
-			queryExpr = objectMapper.readValue(file, Object.class);
+			queryExpr = objectMapper.readValue(json, Object.class);
 		} catch (Exception e) {
-			throw new QueryerFactoryException(e);
+			throw new JsonException(e);
 		}
 		return makeQueryer(queryExpr);
 	}
 
-	public static Queryer makeQueryer(InputStream inputStream)
-			throws QueryerFactoryException {
+	/**
+	 * Make a Queryer from a Reader containing a JSON value.
+	 */
+	public static Queryer makeQueryer(Reader json) throws JsonException,
+			JhqlJsonGrammarException {
 		Object queryExpr;
 		try {
-			queryExpr = objectMapper.readValue(inputStream, Object.class);
+			queryExpr = objectMapper.readValue(json, Object.class);
 		} catch (Exception e) {
-			throw new QueryerFactoryException(e);
+			throw new JsonException(e);
 		}
 		return makeQueryer(queryExpr);
 	}
 
-	public static Queryer makeQueryer(String jsonString)
-			throws QueryerFactoryException {
+	/**
+	 * Make a Queryer from an InputStream containing a JSON value.
+	 */
+	public static Queryer makeQueryer(InputStream json) throws JsonException,
+			JhqlJsonGrammarException {
 		Object queryExpr;
 		try {
-			queryExpr = objectMapper.readValue(jsonString, Object.class);
+			queryExpr = objectMapper.readValue(json, Object.class);
 		} catch (Exception e) {
-			throw new QueryerFactoryException(e);
+			throw new JsonException(e);
 		}
 		return makeQueryer(queryExpr);
 	}
 
-	public static Queryer makeQueryer(Object queryExpr) {
+	/**
+	 * Make a Queryer from an String containing a JSON value.
+	 */
+	public static Queryer makeQueryer(String json) throws JsonException,
+			JhqlJsonGrammarException {
+		Object queryExpr;
+		try {
+			queryExpr = objectMapper.readValue(json, Object.class);
+		} catch (Exception e) {
+			throw new JsonException(e);
+		}
+		return makeQueryer(queryExpr);
+	}
+
+	/**
+	 * Make a Queryer from a mapped JSON object. JSON values are mapped to Java
+	 * types like int, String, boolean, List, Map, etc.
+	 * 
+	 * @param json
+	 *            The Java object corresponding to the JSON grammar.
+	 * @return A Queryer object.
+	 * @throws JhqlJsonGrammarException
+	 */
+	public static Queryer makeQueryer(Object queryExpr)
+			throws JhqlJsonGrammarException {
 		if (queryExpr instanceof String) {
 			return makeSimpleQueryer((String) queryExpr);
 		} else if (queryExpr instanceof Map) {
@@ -59,15 +97,16 @@ public class JsonQueryerFactory {
 				return makeObjectQueryer(queryExprMap);
 			}
 		}
-		throw new IllegalAccessError("Illegal query expression:" + queryExpr);
+		throw new JhqlJsonGrammarException("Illegal JHQL query expression:"
+				+ queryExpr);
 	}
 
 	private static Queryer makeSimpleQueryer(String queryExpr)
-			throws IllegalArgumentException {
+			throws JhqlJsonGrammarException {
 		String[] pair = queryExpr.split(":");
 		if (pair.length != 2) {
-			throw new IllegalArgumentException("Illegal string expression: "
-					+ queryExpr);
+			throw new JhqlJsonGrammarException(
+					"Illegal JHQL string expression: " + queryExpr);
 		}
 
 		String type = pair[0];
@@ -85,11 +124,11 @@ public class JsonQueryerFactory {
 		try {
 			type = (String) queryExpr.get("_type");
 		} catch (ClassCastException e) {
-			throw new IllegalArgumentException(
+			throw new JhqlJsonGrammarException(
 					"'_type' field must be a string.");
 		}
 		if (type == null) {
-			throw new IllegalArgumentException(
+			throw new JhqlJsonGrammarException(
 					"Complexed queryers must contain '_type' field.");
 		}
 
@@ -98,7 +137,7 @@ public class JsonQueryerFactory {
 			try {
 				value = (String) queryExpr.get("value");
 			} catch (ClassCastException e) {
-				throw new IllegalArgumentException(
+				throw new JhqlJsonGrammarException(
 						"The 'value' field of a 'text' queryer must be a string.");
 			}
 			return makeTextQueryer(value);
@@ -107,7 +146,7 @@ public class JsonQueryerFactory {
 			try {
 				value = (String) queryExpr.get("value");
 			} catch (ClassCastException e) {
-				throw new IllegalArgumentException(
+				throw new JhqlJsonGrammarException(
 						"The 'value' field of an 'int' queryer must be a string.");
 			}
 			return makeIntQueryer(value);
@@ -116,10 +155,10 @@ public class JsonQueryerFactory {
 			try {
 				from = (String) queryExpr.get("from");
 			} catch (NullPointerException e) {
-				throw new IllegalArgumentException(
+				throw new JhqlJsonGrammarException(
 						"A 'list' queryer must have a 'from' field.");
 			} catch (ClassCastException e) {
-				throw new IllegalArgumentException(
+				throw new JhqlJsonGrammarException(
 						"The 'from' field of a 'list' queryer must be a string.");
 			}
 
@@ -127,13 +166,13 @@ public class JsonQueryerFactory {
 			try {
 				mapper = queryExpr.get("select");
 			} catch (NullPointerException e) {
-				throw new IllegalArgumentException(
+				throw new JhqlJsonGrammarException(
 						"A 'list' queryer must have a 'select' field.");
 			}
 
 			return makeListQueryer(from, mapper);
 		}
-		throw new IllegalArgumentException("Unsupported queryer type: " + type);
+		throw new JhqlJsonGrammarException("Unsupported queryer type: " + type);
 	}
 
 	private static Queryer makeTextQueryer(String value) {

@@ -1,13 +1,10 @@
 package org.github.wks.jhql.factory;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.github.wks.jhql.query.IntQueryer;
 import org.github.wks.jhql.query.ListQueryer;

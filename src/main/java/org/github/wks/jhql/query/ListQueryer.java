@@ -52,7 +52,6 @@ public class ListQueryer implements Queryer {
 			throw new ParsingException("Error applying the 'from' part "
 					+ fromExpr + "to node " + node, e);
 		}
-		System.err.println("Querying from " + froms);
 		List<Object> results = new ArrayList<Object>();
 		for (Node n : froms) {
 			Object r = mapper.query(n, context);

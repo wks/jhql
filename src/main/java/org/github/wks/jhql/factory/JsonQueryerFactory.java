@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.codehaus.jackson.map.ObjectMapper;
@@ -236,7 +237,7 @@ public class JsonQueryerFactory {
 	}
 
 	private static Queryer makeObjectQueryer(Map<String, Object> queryExpr) {
-		Map<String, Queryer> fieldRules = new HashMap<String, Queryer>();
+		Map<String, Queryer> fieldRules = new LinkedHashMap<String, Queryer>();
 
 		for (Map.Entry<String, Object> pair : queryExpr.entrySet()) {
 			Queryer fieldQueryer = makeQueryer(pair.getValue());

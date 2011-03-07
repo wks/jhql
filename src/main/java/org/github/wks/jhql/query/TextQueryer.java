@@ -11,15 +11,26 @@ import org.w3c.dom.Node;
  * contents in all matching nodes.
  */
 public class TextQueryer extends XPathQueryer {
+	private boolean trim = true;
+
+	public void setTrim(boolean trim) {
+		this.trim = trim;
+	}
+
 	public TextQueryer() {
 	}
 
 	public TextQueryer(String xPathExpression) throws IllegalArgumentException {
 		this.setValue(xPathExpression);
 	}
+	
 
 	public String query(Node node, Map<String, Object> context) {
-		return queryWithGrep(node);
+		String result = queryWithGrep(node);
+		if(trim) {
+			result = result.trim();
+		}
+		return result;
 	}
 
 }

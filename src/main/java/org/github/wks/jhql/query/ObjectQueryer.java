@@ -1,6 +1,6 @@
 package org.github.wks.jhql.query;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.w3c.dom.Node;
@@ -18,7 +18,7 @@ public class ObjectQueryer implements Queryer {
 	}
 
 	public Map<String, Object> query(Node node, Map<String, Object> context) {
-		Map<String, Object> result = new HashMap<String, Object>();
+		Map<String, Object> result = new LinkedHashMap<String, Object>();
 		for (Map.Entry<String, Queryer> rulePair : fieldRules.entrySet()) {
 			Object fieldResult = rulePair.getValue().query(node, context);
 			result.put(rulePair.getKey(), fieldResult);

@@ -3,6 +3,7 @@ package org.github.wks.jhql.query;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
 
 import org.github.wks.jhql.query.annotation.Required;
@@ -34,7 +35,7 @@ public class DateQueryer extends XPathQueryer {
 	public Date query(Node node, Map<String, Object> context) {
 		String result = this.queryWithGrep(node).trim();
 		
-		SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
+		SimpleDateFormat sdf = new SimpleDateFormat(dateFormat, Locale.US);
 		
 		try {
 			return sdf.parse(result);

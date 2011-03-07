@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.github.wks.jhql.query.ContextQueryer;
+import org.github.wks.jhql.query.DateQueryer;
 import org.github.wks.jhql.query.IntQueryer;
 import org.github.wks.jhql.query.ListQueryer;
 import org.github.wks.jhql.query.ObjectQueryer;
@@ -31,6 +32,7 @@ public class JsonQueryerFactory {
 		namedQueryers.put("int", IntQueryer.class);
 		namedQueryers.put("list", ListQueryer.class);
 		namedQueryers.put("context", ContextQueryer.class);
+		namedQueryers.put("date", DateQueryer.class);
 	}
 
 	private static ObjectMapper objectMapper = new ObjectMapper();

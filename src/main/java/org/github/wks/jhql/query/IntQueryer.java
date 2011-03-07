@@ -1,5 +1,7 @@
 package org.github.wks.jhql.query;
 
+import java.util.Map;
+
 import org.w3c.dom.Node;
 
 /**
@@ -8,15 +10,17 @@ import org.w3c.dom.Node;
  * It works like the TestQueryer, but converts the result into an integer. If
  * the result of text querying is not an integer, it returns null.
  */
-public class IntQueryer implements Queryer {
-	private TextQueryer textQueryer;
-
-	public IntQueryer(String xPathExpression) throws IllegalArgumentException {
-		textQueryer = new TextQueryer(xPathExpression);
+public class IntQueryer extends XPathQueryer {
+	
+	public IntQueryer() {
 	}
 
-	public Integer query(Node node) {
-		String result = textQueryer.query(node).trim();
+	public IntQueryer(String xPathExpression) throws IllegalArgumentException {
+		this.setValue(xPathExpression);
+	}
+
+	public Integer query(Node node, Map<String, Object> context) {
+		String result = this.queryWithGrep(node).trim();
 		try {
 			return new Integer(result);
 		} catch (NumberFormatException e) {

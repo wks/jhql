@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.util.Collections;
+import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -16,6 +18,7 @@ import org.htmlcleaner.DomSerializer;
 import org.w3c.dom.Node;
 
 public class Jhql {
+	private static final Map<String, Object> emptyMap = Collections.emptyMap();
 
 	private HtmlCleaner htmlCleaner = new HtmlCleaner();
 	private DomSerializer domSerializer = new DomSerializer(
@@ -115,7 +118,8 @@ public class Jhql {
 	/**
 	 * Convert a HTML document into a W3C Dom tree.
 	 * 
-	 * @param encoding The encoding of the HTML InputStream.
+	 * @param encoding
+	 *            The encoding of the HTML InputStream.
 	 */
 	public Node htmlToDom(InputStream html, String encoding)
 			throws JhqlException, IOException {
@@ -139,53 +143,119 @@ public class Jhql {
 
 	/**
 	 * Make query on an HTML document.
+	 * 
 	 * @see {@link org.github.wks.jhql.query.Queryer}
 	 */
 	public Object queryHtml(Queryer queryer, File html) throws IOException {
-		return queryer.query(htmlToDom(html));
+		return queryer.query(htmlToDom(html), emptyMap);
 	}
 
 	/**
 	 * Make query on an HTML document.
+	 * 
 	 * @see {@link org.github.wks.jhql.query.Queryer}
 	 */
 	public Object queryHtml(Queryer queryer, String html) {
-		return queryer.query(htmlToDom(html));
+		return queryer.query(htmlToDom(html), emptyMap);
 	}
 
 	/**
 	 * Make query on an HTML document.
+	 * 
 	 * @see {@link org.github.wks.jhql.query.Queryer}
 	 */
 	public Object queryHtml(Queryer queryer, InputStream html)
 			throws JhqlException, IOException {
-		return queryer.query(htmlToDom(html));
+		return queryer.query(htmlToDom(html), emptyMap);
 	}
 
 	/**
 	 * Make query on an HTML document.
+	 * 
 	 * @see {@link org.github.wks.jhql.query.Queryer}
 	 */
 	public Object queryHtml(Queryer queryer, InputStream html, String encoding)
 			throws JhqlException, IOException {
-		return queryer.query(htmlToDom(html, encoding));
+		return queryer.query(htmlToDom(html, encoding), emptyMap);
 	}
 
 	/**
 	 * Make query on an HTML document.
+	 * 
 	 * @see {@link org.github.wks.jhql.query.Queryer}
 	 */
 	public Object queryHtml(Queryer queryer, Reader html) throws IOException {
-		return queryer.query(htmlToDom(html));
+		return queryer.query(htmlToDom(html), emptyMap);
+	}
+
+	/**
+	 * Make query on an HTML document within a specified context.
+	 * 
+	 * @see {@link org.github.wks.jhql.query.Queryer}
+	 */
+	public Object queryHtml(Queryer queryer, File html,
+			Map<String, Object> context) throws IOException {
+		return queryer.query(htmlToDom(html), context);
+	}
+
+	/**
+	 * Make query on an HTML document within a specified context.
+	 * 
+	 * @see {@link org.github.wks.jhql.query.Queryer}
+	 */
+	public Object queryHtml(Queryer queryer, String html,
+			Map<String, Object> context) throws IOException {
+		return queryer.query(htmlToDom(html), context);
+	}
+
+	/**
+	 * Make query on an HTML document within a specified context.
+	 * 
+	 * @see {@link org.github.wks.jhql.query.Queryer}
+	 */
+	public Object queryHtml(Queryer queryer, InputStream html,
+			Map<String, Object> context) throws IOException {
+		return queryer.query(htmlToDom(html), context);
+	}
+
+	/**
+	 * Make query on an HTML document within a specified context.
+	 * 
+	 * @see {@link org.github.wks.jhql.query.Queryer}
+	 */
+	public Object queryHtml(Queryer queryer, InputStream html, String encoding,
+			Map<String, Object> context) throws IOException {
+		return queryer.query(htmlToDom(html), context);
+	}
+
+	/**
+	 * Make query on an HTML document within a specified context.
+	 * 
+	 * @see {@link org.github.wks.jhql.query.Queryer}
+	 */
+	public Object queryHtml(Queryer queryer, Reader html,
+			Map<String, Object> context) throws IOException {
+		return queryer.query(htmlToDom(html), context);
 	}
 
 	/**
 	 * Make query on a DOM Tree.
+	 * 
 	 * @see {@link org.github.wks.jhql.query.Queryer}
 	 */
 	public Object queryHtml(Queryer queryer, Node rootNode)
 			throws JhqlException, IOException {
-		return queryer.query(rootNode);
+		return queryer.query(rootNode, emptyMap);
+	}
+
+	/**
+	 * Make query on a DOM Tree within a specified context.
+	 * 
+	 * @see {@link org.github.wks.jhql.query.Queryer}
+	 */
+	public Object queryHtml(Queryer queryer, Node rootNode,
+			Map<String, Object> context) throws JhqlException, IOException {
+		return queryer.query(rootNode, context);
 	}
 
 }

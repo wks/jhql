@@ -17,10 +17,10 @@ public class ObjectQueryer implements Queryer {
 		this.fieldRules = fieldRules;
 	}
 
-	public Map<String, Object> query(Node node) {
+	public Map<String, Object> query(Node node, Map<String, Object> context) {
 		Map<String, Object> result = new HashMap<String, Object>();
 		for (Map.Entry<String, Queryer> rulePair : fieldRules.entrySet()) {
-			Object fieldResult = rulePair.getValue().query(node);
+			Object fieldResult = rulePair.getValue().query(node, context);
 			result.put(rulePair.getKey(), fieldResult);
 		}
 		return result;

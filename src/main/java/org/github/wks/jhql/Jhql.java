@@ -204,7 +204,7 @@ public class Jhql {
 	 * @see {@link org.github.wks.jhql.query.Queryer}
 	 */
 	public Object queryHtml(Queryer queryer, String html,
-			Map<String, Object> context) throws IOException {
+			Map<String, Object> context) {
 		return queryer.query(htmlToDom(html), context);
 	}
 

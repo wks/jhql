@@ -85,7 +85,7 @@ public class Jhql {
 	/**
 	 * Convert a HTML document into a W3C Dom tree.
 	 */
-	public Node htmlToDom(String html) {
+	public Node htmlToDom(String html) throws JhqlException {
 		try {
 			return domSerializer.createDOM(htmlCleaner.clean(html));
 		} catch (ParserConfigurationException e) {
@@ -96,7 +96,7 @@ public class Jhql {
 	/**
 	 * Convert a HTML document into a W3C Dom tree.
 	 */
-	public Node htmlToDom(File html) throws IOException {
+	public Node htmlToDom(File html) throws JhqlException, IOException {
 		try {
 			return domSerializer.createDOM(htmlCleaner.clean(html));
 		} catch (ParserConfigurationException e) {
@@ -107,7 +107,7 @@ public class Jhql {
 	/**
 	 * Convert a HTML document into a W3C Dom tree.
 	 */
-	public Node htmlToDom(InputStream html) throws IOException {
+	public Node htmlToDom(InputStream html) throws JhqlException, IOException {
 		try {
 			return domSerializer.createDOM(htmlCleaner.clean(html));
 		} catch (ParserConfigurationException e) {
@@ -133,7 +133,7 @@ public class Jhql {
 	/**
 	 * Convert a HTML document into a W3C Dom tree.
 	 */
-	public Node htmlToDom(Reader html) throws IOException {
+	public Node htmlToDom(Reader html) throws JhqlException, IOException {
 		try {
 			return domSerializer.createDOM(htmlCleaner.clean(html));
 		} catch (ParserConfigurationException e) {
@@ -165,7 +165,7 @@ public class Jhql {
 	 * @see {@link org.github.wks.jhql.query.Queryer}
 	 */
 	public Object queryHtml(Queryer queryer, InputStream html)
-			throws JhqlException, IOException {
+			throws IOException {
 		return queryer.query(htmlToDom(html), emptyMap);
 	}
 
@@ -175,7 +175,7 @@ public class Jhql {
 	 * @see {@link org.github.wks.jhql.query.Queryer}
 	 */
 	public Object queryHtml(Queryer queryer, InputStream html, String encoding)
-			throws JhqlException, IOException {
+			throws IOException {
 		return queryer.query(htmlToDom(html, encoding), emptyMap);
 	}
 
@@ -243,8 +243,7 @@ public class Jhql {
 	 * 
 	 * @see {@link org.github.wks.jhql.query.Queryer}
 	 */
-	public Object queryHtml(Queryer queryer, Node rootNode)
-			throws JhqlException, IOException {
+	public Object queryHtml(Queryer queryer, Node rootNode) {
 		return queryer.query(rootNode, emptyMap);
 	}
 
@@ -254,7 +253,7 @@ public class Jhql {
 	 * @see {@link org.github.wks.jhql.query.Queryer}
 	 */
 	public Object queryHtml(Queryer queryer, Node rootNode,
-			Map<String, Object> context) throws JhqlException, IOException {
+			Map<String, Object> context) {
 		return queryer.query(rootNode, context);
 	}
 

@@ -1,0 +1,23 @@
+{
+	"title": "text://h1",
+	"date": {
+		"_type": "date",
+		"value": "//div",
+		"grep": "(\\d+-\\d+-\\d+ \\d+:\\d+:\\d+)",
+		"dateFormat": "yyyy-MM-dd HH:mm:ss"
+	},
+	"replies": "int://span",
+	"author": {
+		"_type": "text",
+		"value": "//pre",
+		"grep": "author is (\\w+)"
+	},
+	"posts": {
+		"_type": "list",
+		"from": "//div[@class='bar']",
+		"select": {
+			"name": "text:./a",
+			"value": "text:./b"
+		}
+	}
+}

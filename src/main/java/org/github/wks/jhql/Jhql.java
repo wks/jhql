@@ -9,7 +9,7 @@ import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.github.wks.jhql.factory.JhqlJsonGrammarException;
+import org.github.wks.jhql.factory.JhqlGrammarException;
 import org.github.wks.jhql.factory.JsonQueryerFactory;
 import org.github.wks.jhql.factory.JsonException;
 import org.github.wks.jhql.query.Queryer;
@@ -54,7 +54,7 @@ public class Jhql {
 	 * Make a Queryer from a File containing a JSON value.
 	 */
 	public Queryer makeQueryer(File json) throws JsonException,
-			JhqlJsonGrammarException {
+			JhqlGrammarException {
 		return JsonQueryerFactory.makeQueryer(json);
 	}
 
@@ -62,7 +62,7 @@ public class Jhql {
 	 * Make a Queryer from a Reader containing a JSON value.
 	 */
 	public Queryer makeQueryer(Reader json) throws JsonException,
-			JhqlJsonGrammarException {
+			JhqlGrammarException {
 		return JsonQueryerFactory.makeQueryer(json);
 	}
 
@@ -70,7 +70,7 @@ public class Jhql {
 	 * Make a Queryer from an InputStream containing a JSON value.
 	 */
 	public Queryer makeQueryer(InputStream json) throws JsonException,
-			JhqlJsonGrammarException {
+			JhqlGrammarException {
 		return JsonQueryerFactory.makeQueryer(json);
 	}
 
@@ -78,40 +78,40 @@ public class Jhql {
 	 * Make a Queryer from an String containing a JSON value.
 	 */
 	public Queryer makeQueryer(String json) throws JsonException,
-			JhqlJsonGrammarException {
+			JhqlGrammarException {
 		return JsonQueryerFactory.makeQueryer(json);
 	}
 
 	/**
 	 * Convert a HTML document into a W3C Dom tree.
 	 */
-	public Node htmlToDom(String html) throws JhqlException {
+	public Node htmlToDom(String html) throws HtmlException {
 		try {
 			return domSerializer.createDOM(htmlCleaner.clean(html));
 		} catch (ParserConfigurationException e) {
-			throw new JhqlException(e);
+			throw new HtmlException(e);
 		}
 	}
 
 	/**
 	 * Convert a HTML document into a W3C Dom tree.
 	 */
-	public Node htmlToDom(File html) throws JhqlException, IOException {
+	public Node htmlToDom(File html) throws HtmlException, IOException {
 		try {
 			return domSerializer.createDOM(htmlCleaner.clean(html));
 		} catch (ParserConfigurationException e) {
-			throw new JhqlException(e);
+			throw new HtmlException(e);
 		}
 	}
 
 	/**
 	 * Convert a HTML document into a W3C Dom tree.
 	 */
-	public Node htmlToDom(InputStream html) throws JhqlException, IOException {
+	public Node htmlToDom(InputStream html) throws HtmlException, IOException {
 		try {
 			return domSerializer.createDOM(htmlCleaner.clean(html));
 		} catch (ParserConfigurationException e) {
-			throw new JhqlException(e);
+			throw new HtmlException(e);
 		}
 	}
 
@@ -122,22 +122,22 @@ public class Jhql {
 	 *            The encoding of the HTML InputStream.
 	 */
 	public Node htmlToDom(InputStream html, String encoding)
-			throws JhqlException, IOException {
+			throws HtmlException, IOException {
 		try {
 			return domSerializer.createDOM(htmlCleaner.clean(html, encoding));
 		} catch (ParserConfigurationException e) {
-			throw new JhqlException(e);
+			throw new HtmlException(e);
 		}
 	}
 
 	/**
 	 * Convert a HTML document into a W3C Dom tree.
 	 */
-	public Node htmlToDom(Reader html) throws JhqlException, IOException {
+	public Node htmlToDom(Reader html) throws HtmlException, IOException {
 		try {
 			return domSerializer.createDOM(htmlCleaner.clean(html));
 		} catch (ParserConfigurationException e) {
-			throw new JhqlException(e);
+			throw new HtmlException(e);
 		}
 	}
 

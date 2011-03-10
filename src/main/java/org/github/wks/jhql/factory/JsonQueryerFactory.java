@@ -44,7 +44,7 @@ public class JsonQueryerFactory {
 	 * Make a Queryer from a File containing a JSON value.
 	 */
 	public static Queryer makeQueryer(File json) throws JsonException,
-			JhqlJsonGrammarException {
+			JhqlGrammarException {
 		Object queryExpr;
 		try {
 			queryExpr = objectMapper.readValue(json, Object.class);
@@ -58,7 +58,7 @@ public class JsonQueryerFactory {
 	 * Make a Queryer from a Reader containing a JSON value.
 	 */
 	public static Queryer makeQueryer(Reader json) throws JsonException,
-			JhqlJsonGrammarException {
+			JhqlGrammarException {
 		Object queryExpr;
 		try {
 			queryExpr = objectMapper.readValue(json, Object.class);
@@ -72,7 +72,7 @@ public class JsonQueryerFactory {
 	 * Make a Queryer from an InputStream containing a JSON value.
 	 */
 	public static Queryer makeQueryer(InputStream json) throws JsonException,
-			JhqlJsonGrammarException {
+			JhqlGrammarException {
 		Object queryExpr;
 		try {
 			queryExpr = objectMapper.readValue(json, Object.class);
@@ -86,7 +86,7 @@ public class JsonQueryerFactory {
 	 * Make a Queryer from an String containing a JSON value.
 	 */
 	public static Queryer makeQueryer(String json) throws JsonException,
-			JhqlJsonGrammarException {
+			JhqlGrammarException {
 		Object queryExpr;
 		try {
 			queryExpr = objectMapper.readValue(json, Object.class);
@@ -103,10 +103,10 @@ public class JsonQueryerFactory {
 	 * @param json
 	 *            The Java object corresponding to the JSON grammar.
 	 * @return A Queryer object.
-	 * @throws JhqlJsonGrammarException
+	 * @throws JhqlGrammarException
 	 */
 	public static Queryer makeQueryer(Object queryExpr)
-			throws JhqlJsonGrammarException {
+			throws JhqlGrammarException {
 		if (queryExpr instanceof String) {
 			return makeSimpleQueryer((String) queryExpr);
 		} else if (queryExpr instanceof Map) {
@@ -118,16 +118,15 @@ public class JsonQueryerFactory {
 				return makeObjectQueryer(queryExprMap);
 			}
 		}
-		throw new JhqlJsonGrammarException("Illegal JHQL query expression:"
-				+ queryExpr);
+		throw new JhqlGrammarException("Illegal JHQL expression: " + queryExpr);
 	}
 
 	private static Queryer makeSimpleQueryer(String queryExpr)
-			throws JhqlJsonGrammarException {
+			throws JhqlGrammarException {
 		String[] pair = queryExpr.split(":");
 		if (pair.length != 2) {
-			throw new JhqlJsonGrammarException(
-					"Illegal JHQL string expression: " + queryExpr);
+			throw new JhqlGrammarException("Illegal JHQL string expression: "
+					+ queryExpr);
 		}
 
 		String type = pair[0];
@@ -145,27 +144,26 @@ public class JsonQueryerFactory {
 		try {
 			type = (String) queryExpr.get("_type");
 		} catch (ClassCastException e) {
-			throw new JhqlJsonGrammarException(
-					"'_type' field must be a string.");
+			throw new JhqlGrammarException("'_type' field must be a string.");
 		}
 		if (type == null) {
-			throw new JhqlJsonGrammarException(
-					"Complexed queryers must contain '_type' field.");
+			throw new JhqlGrammarException(
+					"Complexed queryers must contain a '_type' field.");
 		}
 
 		Class<? extends Queryer> queryerClass = namedQueryers.get(type);
 
 		if (queryerClass == null) {
-			throw new JhqlJsonGrammarException("Unsupported queryer type: "
-					+ type);
+			throw new JhqlGrammarException("Unsupported queryer type: '" + type
+					+ "'.");
 		}
 
 		Queryer queryer;
 		try {
 			queryer = queryerClass.newInstance();
 		} catch (Exception e) {
-			throw new JhqlJsonGrammarException("Cannot instantiate queryer "
-					+ type + ".", e);
+			throw new JhqlGrammarException("Cannot instantiate queryer '"
+					+ type + "'.", e);
 		}
 
 		Map<String, Object> queryExprCopy = new HashMap<String, Object>(
@@ -178,8 +176,8 @@ public class JsonQueryerFactory {
 			BeanInfo beanInfo = Introspector.getBeanInfo(queryerClass);
 			propertyDescriptors = beanInfo.getPropertyDescriptors();
 		} catch (IntrospectionException e) {
-			throw new JhqlJsonGrammarException("Cannot introspect queryer "
-					+ type + ".", e);
+			throw new JhqlGrammarException("Cannot introspect queryer '" + type
+					+ "'.", e);
 		}
 
 		for (PropertyDescriptor pd : propertyDescriptors) {
@@ -205,17 +203,17 @@ public class JsonQueryerFactory {
 				try {
 					writeMethod.invoke(queryer, valueToWrite);
 				} catch (Exception e) {
-					throw new JhqlJsonGrammarException("Cannot set property "
-							+ propertyName + " on Queryer type " + type, e);
+					throw new JhqlGrammarException("Cannot set property '"
+							+ propertyName + "' on Queryer type '" + type
+							+ "'.", e);
 				}
 				queryExprCopy.remove(propertyName);
 			} else {
 				Required requiredAnnotation = writeMethod
 						.getAnnotation(Required.class);
 				if (requiredAnnotation != null) {
-					throw new JhqlJsonGrammarException("Property "
-							+ propertyName + " is required for Queryer type "
-							+ type);
+					throw new JhqlGrammarException("Property '" + propertyName
+							+ "' is required for Queryer type '" + type + "'.");
 				}
 			}
 		}
@@ -231,8 +229,8 @@ public class JsonQueryerFactory {
 				}
 				sb.append(str);
 			}
-			throw new JhqlJsonGrammarException("Unexpected property "
-					+ sb.toString() + " on Queryer type " + type);
+			throw new JhqlGrammarException("Unexpected property '"
+					+ sb.toString() + "' on Queryer type '" + type + "'.");
 		}
 
 		return queryer;

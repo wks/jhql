@@ -1,12 +1,14 @@
 package org.github.wks.jhql.query;
 
 import java.util.List;
+import java.util.Map;
+
 import org.github.wks.jhql.query.annotation.Required;
 import org.jaxen.JaxenException;
 import org.jaxen.dom.DOMXPath;
 import org.w3c.dom.Node;
 
-public abstract class XPathQueryer extends GrepableQueryer {
+public abstract class XPathQueryer<T> extends ScalarQueryer<T> {
 	private DOMXPath xPath;
 
 	@Required
@@ -20,7 +22,8 @@ public abstract class XPathQueryer extends GrepableQueryer {
 		}
 	}
 
-	protected final String queryForString(Node node) {
+	@Override
+	protected String generate(Node node, Map<String,Object> context) {
 		try {
 			@SuppressWarnings("unchecked")
 			List<Node> results = xPath.selectNodes(node);
@@ -36,7 +39,4 @@ public abstract class XPathQueryer extends GrepableQueryer {
 		}
 	}
 
-	protected String queryWithGrep(Node node) {
-		return (String) grep(queryForString(node));
-	}
 }

@@ -7,7 +7,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.github.wks.jhql.query.annotation.Required;
-import org.w3c.dom.Node;
 
 /**
  * A Queryer that returns a java.util.Date object.
@@ -16,7 +15,7 @@ import org.w3c.dom.Node;
  * format of the date is set by the "dateFormat" property. If the result of
  * text querying is not an integer, it returns null.
  */
-public class DateQueryer extends XPathQueryer {
+public class DateQueryer extends XPathQueryer<Date> {
 
 	private String dateFormat;
 
@@ -32,8 +31,8 @@ public class DateQueryer extends XPathQueryer {
 		this.setValue(xPathExpression);
 	}
 
-	public Date query(Node node, Map<String, Object> context) {
-		String result = this.queryWithGrep(node).trim();
+	public Date convert(Object obj, Map<String, Object> context) {
+		String result = obj.toString();
 		
 		SimpleDateFormat sdf = new SimpleDateFormat(dateFormat, Locale.US);
 		

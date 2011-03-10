@@ -2,16 +2,14 @@ package org.github.wks.jhql.query;
 
 import java.util.Map;
 
-import org.w3c.dom.Node;
-
 /**
  * A Queryer that returns an integer.
  * <p>
  * It works like the TestQueryer, but converts the result into an integer. If
  * the result of text querying is not an integer, it returns null.
  */
-public class IntQueryer extends XPathQueryer {
-	
+public class IntQueryer extends XPathQueryer<Integer> {
+
 	public IntQueryer() {
 	}
 
@@ -19,8 +17,8 @@ public class IntQueryer extends XPathQueryer {
 		this.setValue(xPathExpression);
 	}
 
-	public Integer query(Node node, Map<String, Object> context) {
-		String result = this.queryWithGrep(node).trim();
+	public Integer convert(Object object, Map<String, Object> context) {
+		String result = ((String) object).trim();
 		try {
 			return new Integer(result);
 		} catch (NumberFormatException e) {

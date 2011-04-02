@@ -113,7 +113,7 @@ public class JsonQueryerFactory {
 			@SuppressWarnings("unchecked")
 			Map<String, Object> queryExprMap = (Map<String, Object>) queryExpr;
 			if (queryExprMap.containsKey("_type")) {
-				return makeComplexedQueryer(queryExprMap);
+				return makeComplexQueryer(queryExprMap);
 			} else {
 				return makeObjectQueryer(queryExprMap);
 			}
@@ -136,10 +136,10 @@ public class JsonQueryerFactory {
 		queryExprObj.put("_type", type);
 		queryExprObj.put("value", value);
 
-		return makeComplexedQueryer(queryExprObj);
+		return makeComplexQueryer(queryExprObj);
 	}
 
-	private static Queryer makeComplexedQueryer(Map<String, Object> queryExpr) {
+	private static Queryer makeComplexQueryer(Map<String, Object> queryExpr) {
 		String type;
 		try {
 			type = (String) queryExpr.get("_type");

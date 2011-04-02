@@ -13,6 +13,7 @@ import org.github.wks.jhql.factory.JhqlGrammarException;
 import org.github.wks.jhql.factory.JsonQueryerFactory;
 import org.github.wks.jhql.factory.JsonException;
 import org.github.wks.jhql.query.Queryer;
+import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.DomSerializer;
 import org.w3c.dom.Node;
@@ -20,9 +21,18 @@ import org.w3c.dom.Node;
 public class Jhql {
 	private static final Map<String, Object> emptyMap = Collections.emptyMap();
 
-	private HtmlCleaner htmlCleaner = new HtmlCleaner();
-	private DomSerializer domSerializer = new DomSerializer(
-			htmlCleaner.getProperties());
+	private CleanerProperties cleanerProperties = new CleanerProperties();
+	{
+		// Some XHTML pages contain xml:xxx attributes like xml:lang,
+		// which would be treated by HtmlCleaner as ordinary attributes
+		// with namespace "xml". However, the prefix xml is reserved in XML.
+		// In this case, error would occur when serializing TagNode trees
+		// into W3C DOM Trees.
+		cleanerProperties.setNamespacesAware(false);
+	}
+
+	private HtmlCleaner htmlCleaner = new HtmlCleaner(cleanerProperties);
+	private DomSerializer domSerializer = new DomSerializer(cleanerProperties);
 
 	/**
 	 * Get the underlying HtmlCleaner. Enables configuration.

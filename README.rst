@@ -4,25 +4,70 @@ JHQL - The JSON HTML Query Language
 
 Author: Kunshan Wang
 
-JHQL is a JSON-based language expressing a mapping from an HTML page to a
-JSON-like value.  It simplifies the job of extracting texts from HTML pages.
+Using JHQL, you can easily extract interesting fields from an HTML web
+page.
 
 Introduction
 ============
 
-A typical scenario consists of three parts: a JHQL expression, an input and an output.
+JHQL is a JSON-based language expressing a mapping from an HTML page to
+a JSON-like value.
 
-- The JHQL expression defines the rules of converting HTML pages into JSON-like values.
-  It is expressed using a JSON value with XPath expressions inside (see below for details).
-- The input is an HTML page. More precisely, a DOM node.
-- The output is a JSON-like value.  In this Java implementation, it can be null, a boolean
-  value, an int, a List<Object> or a Map<String,Object>, all of which can be converted to
-  corresponding JSON values. It can also yield Java-specific values like java.util.Date.
+Suppose you are looking at the HTML source code of a web page and you
+are interested in the project name, the author's name and the download
+address::
 
-Example
-=======
+    ....
+    <h1>The JHQL Project</h1>
+    <div>Author: <span id="author-name">wks</span></div>
+    <h2>Download</h2>
+    <div id="download-box">
+        Please click <a href="http://www.example.com/">here</a>.
+    </div>
+    ....
 
-A JHQL expression is a JSON Value (most probably a JSON Object) like this::
+With adequate knowledge of Java and HTML/XML, you can use DOM or XPath
+to locate and extract those fields.  But directly using the DOM or the
+XPath API is boring and your code will soon become unreadable. There is
+a more beautiful way to do this.  Write a JHQL expression like this
+(You are right.  It is a JSON Value.)::
+
+    {
+        "projectName": "text://h1",
+        "authorName": "text://*[@id='author-name']",
+        "downloadUrl": "text://*[@id='download-box']/a/@href"
+    }
+
+Save this script as "myexpression.jhql".  In Java, do this::
+
+    public static void main(String[] args) throws Exception {
+        Jhql jhql = new Jhql();
+    
+        Queryer queryer = jhql.makeQueryer("myexpression.jhql");
+    
+        Object result = jhql.queryHtml(queryer, "theAboveExampe.html");
+    
+        System.out.println(result);
+    }
+
+It will print::
+
+    {projectName=The JHQL Project, authorName=wks, downloadUrl=http://www.example.com/}
+
+The 'result' variable is a Map<String, Object> in Java, although JHQL
+was designed to generate a JSON Value roughly equivalent to::
+
+    {
+        "projectName": "The JHQL Project",
+        "authorName": "wks",
+        "downloadUrl": "http://www.example.com/"
+    }
+
+More Examples
+=============
+
+A JHQL expression is a JSON Value (most probably a JSON Object) like
+this::
 
     {
         "username": "text:.//h1/text()",
@@ -34,12 +79,12 @@ A JHQL expression is a JSON Value (most probably a JSON Object) like this::
         }
     }
 
-You can guess that it extracts the "username" and the "fullname" 
-from an HTML page using XPath.  It also extracts a date using a combination
-of an XPath expression and a date format string.
+As you can guess, it extracts the username and the fullname
+from an HTML page using XPath.  It also extracts a date using a
+combination of an XPath and a date format (see SimpleDateFormat).
 
-When you apply this JHQL expression to this page https://github.com/wks/ , it
-gives you::
+When you apply this JHQL expression to this page
+https://github.com/wks/ , it gives you::
 
     {
         "username" : "wks",
@@ -47,7 +92,10 @@ gives you::
         "membersince" : "2010-08-18T16:00:00.000+0000"
     }
 
-JHQL also support some complex queries.  The following::
+The result here is in the JSON form.  You actually get a LinkedHashMap
+in Java, but you can convert it into JSON if you want. (Try Jackson)
+
+A more complex query::
 
     {
         "username": "text:.//h1/text()",
@@ -63,9 +111,11 @@ JHQL also support some complex queries.  The following::
         }
     }
     
-will find all DOM nodes at ".//li[@class='public']" and do the query in "select"
-on each matching node.  This, when applied also on https://github.com/wks/, will
-give you::
+"publicRepos" selects multiple nodes.  It will first find all DOM nodes
+using the XPath in the "from" part: ".//li[@class='public']".  Then it
+does the query in the "select" on each matching node.
+
+Apply this on https://github.com/wks/, you get::
 
     {
         "username" : "wks",
@@ -88,32 +138,23 @@ give you::
         ]
     }
 
-Of course it is recommended to use the Web site's native restful API 
-(see http://develop.github.com/) whenever possible in real-world applications.
+Of course you should use the GitHub's native restful API (see 
+http://develop.github.com/).  JHQL is only the last resort for you if
+the site you need does not give you any such APIs.
 
-JHQL Grammar
-============
+JHQL Expression Grammar
+=======================
 
-A JHQL expression defines a Queryer.  A Queryer is an object that converts HTML
-pages into JSON-like values.
+A JHQL expression defines a Queryer.  A Queryer is an object that
+converts HTML pages into JSON-like values.
 
-A JHQL expression can be a *simple expression*, a *complex expression* or an *object
-expression*.
+A JHQL expression can be a *complex expression*, a *simple expression*
+or an *object expression*.
 
-A **simple expression** is a JSON string of the form: "type:value".  It includes at least
-one colon ':'.  The substring before the first colon is the type and the substring
-after the colon is the value.  It is a short-hand and is exactly equivalent to the
-following **complex expression**::
-
-    {
-        "_type": (the type in the simple expression),
-        "value": (the value in the simple expression)
-    }
-
-A **complex expression** is a JSON object with a "_type" field.  It defines a Queryer
-whose type is the value of the "_type" field.  Other fields may be included and the
-value of each field is assigned to the property of the Queryer with the field name
-as the property's name and the field's value as the property's value.
+A **complex expression** is a JSON object with a "_type" field.  This
+kind of expression defines a Queryer using a type and many properties.
+The type is the value of the "_type" field.  Other fields not beginning
+with an underscope '_' define properties.
 
 For example::
 
@@ -123,16 +164,36 @@ For example::
         "grep": "(\\d+)"
     }
 
-It will create a Queryer of type "text" with its property "value" set to "//div" and
-its property "grep" set to "(\\d+)".
+It will create a Queryer of type "text" with its property "value" set
+to "//div" and its property "grep" set to "(\\d+)".
 
-The property value can be null, true, false, number, string, array and Queryer.
-When the expected property value is a Queryer, it is also expressed as a (nested)
-JHQL expression.
+The property value can be null, true, false, number, string, array or
+Queryer. When the expected property is a Queryer, it is also expressed
+as a (nested) JHQL expression.
 
-An **object expression** is a JSON object without the "_type" field. It defines a
-special Object Queryer. The value of each field of this expression defines a nested
-sub-Queryer.
+A **simple expression** is a JSON string of the form: "type:value".
+It is exactly equivalent to the following **complex expression**::
+
+    {
+        "_type": (the type in the simple expression),
+        "value": (the value in the simple expression)
+    }
+
+If there are multiple colons ':', the first colon separates the type
+and the value.
+
+An **object expression** is a JSON object without a "_type" field. It
+defines a special Object Queryer (see below). Other fields whose name
+do not begin with an underscope '_' are the Object Queryer's 
+sub-Queryers.  The following expression::
+
+    {
+        "foo": "text://h1",
+        "bar": "text://h2"
+    }
+
+contains two sub-Queryers named "foo" and "bar", defined by two simple
+expressions "text://h1" and "text://h2", respectively.
 
 Predefined Queryers
 ===================
@@ -140,13 +201,13 @@ Predefined Queryers
 text Queryer
 ------------
 
-A text Queryer does an XPath query on the current DOM node.  The text content
-of all matching nodes are concatenated and returned.
+A text Queryer does an XPath query on the current DOM node.  The text
+content of all matching nodes are concatenated and returned.
 
 Properties:
 
 - value
-    (string)
+    (string, required)
     The XPath expression to apply on the current node.
 - grep
     (string, optional)
@@ -154,9 +215,12 @@ Properties:
     It must include exactly one capturing group and the content of that
     group will be the result.
 - trim
-    (boolean, default: false)
-    If set to true, the result after XPath querying and
-    grepping will be trimmed (the leading and trailing spaces will be removed).
+    (boolean, optional, default: false)
+    If set to true, the result will be trimmed (the leading and
+    trailing spaces will be removed).
+
+This Queryer does XPath querying and then grepping and then trimming,
+in this order.
 
 Example::
 
@@ -166,11 +230,214 @@ Applied on::
 
     <body><div><p>hello</p></div><p>world</p></body>
 
-Yields:::
+Yields::
 
     "helloworld"
 
+Another example::
 
+    {
+        "_type": "text",
+        "value": "//p",
+        "grep": "(\\d+)"
+    }
+
+Applied on::
+
+    <p>The number is 123456!</p>
+
+Yields (NOTE: this is a String)::
+
+    "123456"
+
+Yet another example::
+
+    {
+        "_type": "text",
+        "value": "//p",
+        "trim": true
+    }
+
+Applied on::
+
+    <p>    hello world!    </p>
+
+Yields::
+
+    "hello world!"
+
+
+int Queryer
+-----------
+
+Just like the **text** queryer. But it converts the result into an
+integer.
+
+Properties:
+
+- value
+    see **text** queryer
+- grep
+    see **text** queryer
+- trim
+    see **text** queryer
+
+Example::
+
+    {
+        "_type": "int",
+        "value": "//p",
+        "grep": "(\\d+)"
+    }
+
+Applied on::
+
+    <p>The number is 123456!</p>
+
+Yields (NOTE: this is an Integer)::
+
+    123456
+
+Object Queryer
+==============
+
+Object Queryers are defined by the special **object expression** shown
+above.  It has many sub-Queryers.  All sub-Queryers are applied on the
+current DOM Node.  The result of the ObjectQueryer is a JSON Object (or
+a Java Map<String, Object>). The results from each sub-Queryer is added
+as a field of resulting JSON Object.
+
+Example::
+
+    {
+        "foo": "text://h1",
+        "bar": "text://h2",
+        "baz": "text://h3"
+    }
+
+Applied on::
+
+    <div><h3>!</h3><h2>world</h2><h1>hello</h1></div>
+
+Yields::
+
+    {
+        "foo": "hello",
+        "bar": "world",
+        "baz": "!"
+    }
+
+
+list Queryer
+==============
+
+A list Queryer extracts values from multiple DOM Nodes sharing the same
+XPath. It first gets all DOM Nodes that matches the XPath expression
+of the "from" property.  Then the Queryer defined by the "select"
+property is applied on each node matched by "from".  The result is a
+JSON Array (or a Java List) of each result generated by the Queryer
+in the "select" property.
+
+Properties:
+
+- from
+    (string, required)
+    The XPath expression to apply on the current node.
+- select
+    (Queryer, required)
+    A sub-Queryer to apply on each matched node from "from".
+
+Example::
+
+    {
+        "_type": "list",
+        "from": "//p",
+        "select": "text:."
+    }
+
+Applied on::
+
+    <div><p>hello</p><p>world</p><p>!</p></div>
+
+Yields::
+
+    ["hello", "world", "!"]
+
+Another Example::
+
+    {
+        "_type": "list",
+        "from": "//a",
+        "select": {
+            "name": "text:.",
+            "url": "text:./@href"
+        }
+    }
+
+Applied on::
+
+    <div>
+        <a href="http://www.example.com/foo">foo</a>
+        <a href="http://www.example.net/bar">bar</a>
+        <a href="http://www.example.org/baz">baz</a>
+    </div>
+
+Yields::
+
+    [
+        {"name": "foo", "url": "http://www.example.com/foo"},
+        {"name": "bar", "url": "http://www.example.net/bar"},
+        {"name": "baz", "url": "http://www.example.org/baz"}
+    ]
+
+date Queryer
+------------
+
+Just like the **text** queryer. But it converts the result into a
+java.util.Date object.  This is only meaningful in Java.  You can
+adjust the date format as defined by java.text.SimpleDateFormat .
+
+Properties:
+
+- value
+    see **text** queryer
+- grep
+    see **text** queryer
+- trim
+    see **text** queryer
+- dateFormat
+    (string, required)
+    The date format as defined by java.text.SimpleDateFormat
+
+This Queryer does XPath querying, grepping, trimming and then convert
+the result into a Date object according to the dateFormat property.
+
+Example::
+
+    {
+        "_type": "date",
+        "value": "//p",
+        "grep": "(\\d+-\\d+-\\d+)",
+        "dateFormat": "yyyy-MM-dd"
+    }
+
+Applied on::
+
+    <div><p>Today is 2011-12-23.</p></div>
+
+Yields::
+
+    A java.util.Date representing December 23rd, 2011.
+
+literal Queryer
+---------------
+
+(TODO)
+
+context Queryer
+---------------
+
+(TODO)
 
 Java usage
 ==========

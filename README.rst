@@ -284,6 +284,18 @@ Properties:
 
 Example::
 
+    "int://*[@id='age']"
+
+Applied on::
+
+    <p>Age: <span id="age">12</span></p>
+
+Yields (NOTE: this is an Integer)::
+
+    12
+
+Another example::
+
     {
         "_type": "int",
         "value": "//p",
@@ -432,12 +444,69 @@ Yields::
 literal Queryer
 ---------------
 
-(TODO)
+A queryer that always return to a specified string.
+
+Properties:
+
+- value
+    (string, required)
+    The value which this queryer always return.
+
+Example::
+
+    "literal:Hello world!"
+
+Applied on::
+
+    ..... whatever .....
+
+Yields::
+
+    "Hello world!"
+
+Note: Currently the return value can only be a String.
 
 context Queryer
 ---------------
 
-(TODO)
+A queryer that returns a value in the **context**.
+
+The **context** is a set of key-value pairs. The key is always a string
+and the value can be any kind of value, as long as the implement
+supports.  In Java, the Context is implemented as a Map<String, Object>
+.  When a Queryer is to be applied on a DOM Node, the **context** is
+also supplied.
+
+All the examples above assume that the context is empty, which means
+there is not any key-value pairs in the context. (i.e. an empty Map)
+
+See the **Java Usage** section about how to apply a context.
+
+Properties:
+
+- value
+    (string, required)
+    The key of the key-value pair in the context whose value is
+    supposed be returned.
+
+Example::
+
+    "context:hello_message"
+
+Applied on::
+
+    .... whatever ....
+
+In this context::
+
+    {
+        "hello_message": "Hello world!",
+        "user_name": "wks"
+    }
+
+Yields::
+
+    "Hello world!"
 
 Java usage
 ==========

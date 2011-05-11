@@ -43,9 +43,9 @@ Save this script as "myexpression.jhql".  In Java, do this::
     public static void main(String[] args) throws Exception {
         Jhql jhql = new Jhql();
     
-        Queryer queryer = jhql.makeQueryer("myexpression.jhql");
+        Queryer queryer = jhql.makeQueryer(new File("myexpression.jhql"));
     
-        Object result = jhql.queryHtml(queryer, "theAboveExampe.html");
+        Object result = jhql.queryHtml(queryer, new File("theAboveExampe.html"));
     
         System.out.println(result);
     }

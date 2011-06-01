@@ -311,7 +311,7 @@ Yields (NOTE: this is an Integer)::
     123456
 
 Object Queryer
-==============
+--------------
 
 Object Queryers are defined by the special **object expression** shown
 above.  It has many sub-Queryers.  All sub-Queryers are applied on the
@@ -341,7 +341,7 @@ Yields::
 
 
 list Queryer
-==============
+------------
 
 A list Queryer extracts values from multiple DOM Nodes sharing the same
 XPath. It first gets all DOM Nodes that matches the XPath expression
@@ -508,28 +508,154 @@ Yields::
 
     "Hello world!"
 
-Java usage
+Java Usage
 ==========
 
-TODO: Add Java usage. 
+There is a facade class, org.github.wks.jhql.Jhql, which gives you
+access to most of JHQL's functionalities.
+
+As you have seen in the Introduction section, you should instantiate a
+Jhql object in order to use JHQL.
+
+    Jhql jhql = new Jhql();
+
+To create a Queryer, use the overloaded Jhql.makeQueryer(...) methods.
+The following example creates a Queryer from a text file encoded in
+UTF-8.
+
+    Queryer queryer = jhql.makeQueryer(new File("myexpression.jhql"));
+
+The org.github.wks.jhql.query.Queryer interface is the parent of all
+other Queryers. You can use Queryer.query(node, content) to make
+queries, but it is recommended to use the Jhql facade methods, instead.
+
+    Object result = jhql.queryHtml(queryer, new File("theAboveExampe.html"));
+
+The output type depends on the Queryer's type.  JSON types, including
+string, number, true, false and null, have their Java counterparts,
+namely String, Integer, Boolean and the null pointer.  A JSON Array is
+mapped to a Java ArrayList<Object> and a JSON Object is mapped to
+Java's LinkedHashMap<String, Object>.
+
+Working with Jackson
+--------------------
+
+JHQL relies on Jackson, a JSON library, for reading JSON-based
+expressions. You may also use Jackson to turn a Java value into a JSON
+value.
+
+    ObjectMapper objectMapper = new ObjectMapper();
+    String jsonString = objectMapper.writeValueAsString(result);
+    System.out.println(jsonString);
+
+Note that Jackson, by default, converts java.util.Date into an integer.
+Consult Jackson's documents to find out how to change this behavior.
+
+Using Jackson, you can also convert a Map<String, Object> into a
+strongly-typed Java object following the JavaBean conventions.
+
+Suppose you have your domain object::
+
+    class Person {
+        private String name;
+        private int age;
+        private Date birthDay;
+        // getters and setters ...
+    }
+
+You may write your JHQL expression to match this class's property
+names::
+
+    {
+        "name": "text://some/path",
+        "age": "text://.[@id='age']",
+        "birthDay": { "_type": "date", ... }
+    }
+
+Query to get a Map<String, Object> and then convert into your domain
+object::
+
+    Queryer queryer = jhql.makeQueryer("...");
+    Object result = jhql.queryHtml(queryer, new File("personInfo.html"));
+    
+    ObjectMapper objectMapper = new ObjectMapper();
+    Person person = objectMapper.convertValue(result, Person.class);
+
+Now you have created your Person object by converting from the
+"personInfo.html" web page.
 
 Background
-============
+==========
 
-If you run crawlers on the Internet, do researches on Web data mining or
-write client programs for Web servers that do not provide Web-service
-APIs, you may frequently need to extract texts from web-pages.  You may have to crawl
-a news site, collect many HTML pages containing news articles and write a parser
-that strip out HTML tags, leaving only the title, the main content, the 
-keyword tags and the date the article got published, before doing your research
-tasks like text categorizing, clustering or page-link analysis.
+I (Kunshan Wang) am a graduated student working on Data Mining. I
+created this JQHL "query language" in order to work with real-world
+web pages, specifically the news reports from various news sites.
 
-However, parsing HTML and extracting contents are no trivial tasks.  You can
-use regular expressions on HTML, but it is much easier to use XPath expressions
-to match DOM nodes.  You also need to parse some numbers or dates.  But if you
-write all these directly using Java codes, the code will bloat soon and becomes
-ugly, buggy and unmaintainable.
+Although more and more web sites now support the much cleaner RSS or
+ATOM formats, parsing HTML is still necessary. It has brought me much
+headache to find a proper way to extract useful information from an
+HTML file.
 
-JHQL soothes the pain of parsing HTML.  You define the rule of extraction in an
-elegant and powerful language, JHQL.  HTML pages are processed according to your
-definition and outputs a JSON Object containing your needed information. 
+I tried regular expressions. They are difficult to use because
+**regular expressions are hardly readable** when they are written to
+match a piece of HTML source code. You have to pay attention to many
+regexp meta-characters that may appear in HTML codes.
+You also need to remember whether you have enabled the "DOTALL" mode
+and figure out whether you need "greedy" or "lazy" matching. If there
+is a bug in the expression, it'll take you longer to find it out than
+writing a new expression.
+
+Then I moved to DOM and XPath. I wondered whether XPath actually work
+with real-world web pages since ill-formed HTML pages may be "repaired"
+into different DOM trees according to different HTML parser
+implementations. Fortunately real-world experience told me that XPath
+works for "most" pages, which include all the pages I care about. By
+using more wildcards (like "//\*[@id='foo']") instead of full paths (
+like "/body/p/p/div/span/table/tbody/tr/td/p/a[@id='foo']"), more
+errors can be avoided. So **XPath is a reasonable way** to extract
+things from real-world HTML pages.
+
+But **it is not practical to write XPath expressions directly in Java**
+. XPaths should be compiled before using because of performance. So you
+should usually keep XPath objects as global singletons that stay away
+from your HTML-extraction procedures. Moreover XPath alone is not
+useful because you have to trim the matched text that contains leading
+or trailing whitespaces, use regular expressions again to extract part
+of the text (for example, you only need a number, but the <p></p> also
+contains surrounding words) and then convert the text into other types
+(like int or Date). If your desired information is repeated (like the
+thread list in a forum page), then you have to use wierd for-loops to
+iterate over a list of matching nodes and assemble your own ArrayList
+of matching records.
+
+Then I find myself end up with a Java source file where XPath
+expressions are separated from the main logics and I have to go back
+and forth through the sourcecode to find what XPath expressions I used.
+On the other hand, methods are filled with ugly boilerplate codes and
+the class is filled with random ad-hoc methods which would never be
+used again. **The code no longer express my extraction logic.**
+
+Here is a showcase of such chaotic code:
+https://github.com/wks/libbyr4j/blob/master/src/com/github/wks/libbyr4j/Byr.java
+
+I feel that **I need a domain-specific language** that is dedicated to
+this job.
+
+There are also other "query languages" available. XQuery is a good
+candidate. It queries on an XML document and outputs XML. I personally
+dislike XML because it is harder for Java to work with XML than to work
+with String, Integer, Boolean List and LinkedHashMap.
+
+So I decided to create my own "query language". I considered using XML
+as the format of the query expression, but I didn't use it due to my
+dislike of XML.
+
+Inspired by MongoDB's query language, I decided to use JSON as the
+underlying representation of queries. Then JHQL was born.
+
+Author
+======
+
+Kunshan Wang
+
+wks1986@gmail.com

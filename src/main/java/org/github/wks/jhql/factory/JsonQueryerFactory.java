@@ -21,6 +21,7 @@ import org.github.wks.jhql.query.LiteralQueryer;
 import org.github.wks.jhql.query.ObjectQueryer;
 import org.github.wks.jhql.query.Queryer;
 import org.github.wks.jhql.query.TextQueryer;
+import org.github.wks.jhql.query.ZipQueryer;
 import org.github.wks.jhql.query.annotation.Required;
 
 /**
@@ -36,6 +37,7 @@ public class JsonQueryerFactory {
 		namedQueryers.put("context", ContextQueryer.class);
 		namedQueryers.put("date", DateQueryer.class);
 		namedQueryers.put("literal", LiteralQueryer.class);
+		namedQueryers.put("zip", ZipQueryer.class);
 	}
 
 	private static ObjectMapper objectMapper = new ObjectMapper();

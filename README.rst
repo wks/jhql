@@ -508,6 +508,83 @@ Yields::
 
     "Hello world!"
 
+zip Queryer
+-----------
+
+A queryer that "zips" multiple "list" Queryer's result into one list
+of "big" objects.
+
+This is useful when related informations are not contained in one big
+structure.  A typical situation is sections interlaced by <h1>s and
+<p>s.
+
+    <h1>title1</h1>
+    <p>hello</p>
+    <h1>title2</h2>
+    <p>world</p>
+    ...
+
+The neighboring <h1> and <p> are not nested into another element like
+this::
+
+    <div>
+        <h1>title1</h1>
+        <p>hello</p>
+    </div>
+    <div>...
+
+A single "list" Queryer only work for the latter case, but the former
+case need you to use a "zip" queryer combined with several "list"
+Queryers.
+
+The "zip" queryer is an analog to the "zip" function found in many
+functional programming languages like Haskell as well as Python.
+
+Properties:
+
+- from
+    (An "Object" Queryer, required)
+    An Object Queryer containing many "list" queryers.
+- alignTo
+    (String, must be "shortest" or "longest", default: "shortest")
+    Defines the final length if the result of each "list" queryer is
+    not of the same length.  If "shortest", the final list will be as
+    long as the shortest result and longer results are trimmed.  If
+    "longest", all lists shorter than the longest will be padded with
+    nulls to the length of the longest subresult before zipped.
+
+Example::
+
+    {
+    	"_type": "zip",
+    	"from": {
+    	    "title": {
+    	        "_type": "list",
+    	        "from": "//h1",
+    	        "select": "text:."
+    	    },
+    	    "content": {
+    	        "_type": "list",
+    	        "from": "//p",
+    	        "select": "text:."
+    	    }    	    
+    	}
+    }
+
+Applied on::
+
+    <h1>title1</h1>
+    <p>hello</p>
+    <h1>title2</h1>
+    <p>world</p>
+
+Yields::
+
+    [
+        { "title": "title1", "content": "hello" },
+        { "title": "title2", "content": "world" },
+    ]
+    
 Java Usage
 ==========
 

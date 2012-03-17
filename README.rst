@@ -664,7 +664,7 @@ Now you have created your Person object by converting from the
 Background
 ==========
 
-I (Kunshan Wang) am a graduated student working on Data Mining. I
+I (Kunshan Wang) am a graduate student working on Data Mining. I
 created this JQHL "query language" in order to work with real-world
 web pages, specifically the news reports from various news sites.
 
@@ -701,7 +701,7 @@ or trailing whitespaces, use regular expressions again to extract part
 of the text (for example, you only need a number, but the <p></p> also
 contains surrounding words) and then convert the text into other types
 (like int or Date). If your desired information is repeated (like the
-thread list in a forum page), then you have to use wierd for-loops to
+thread list in a forum page), then you have to use weird for-loops to
 iterate over a list of matching nodes and assemble your own ArrayList
 of matching records.
 

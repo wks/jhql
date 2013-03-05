@@ -299,6 +299,8 @@ Properties:
     see **text** queryer
 - trim
     see **text** queryer
+- attr
+    see **text** queryer
 
 Example::
 
@@ -434,6 +436,8 @@ Properties:
 - grep
     see **text** queryer
 - trim
+    see **text** queryer
+- attr
     see **text** queryer
 - dateFormat
     (string, required)

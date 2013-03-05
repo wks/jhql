@@ -26,6 +26,12 @@ import org.w3c.dom.Node;
 
 public abstract class XPathQueryer<T> extends ScalarQueryer<T> {
 	private DOMXPath xPath;
+	
+	private String attr;
+	
+	public void setAttr(String attr) {
+		this.attr = attr;
+	}
 
 	@Required
 	public void setValue(String xPathExpression)
@@ -45,6 +51,9 @@ public abstract class XPathQueryer<T> extends ScalarQueryer<T> {
 			List<Node> results = xPath.selectNodes(node);
 			StringBuilder sb = new StringBuilder();
 			for (Node n : results) {
+				if (attr != null) {
+					n = n.getAttributes().getNamedItem(attr);
+				}
 				sb.append(n.getTextContent());
 			}
 

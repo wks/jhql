@@ -218,6 +218,9 @@ Properties:
     (boolean, optional, default: false)
     If set to true, the result will be trimmed (the leading and
     trailing spaces will be removed).
+- attr
+    (string, optional)
+    Attribute name in the resulting node. Value of this attribute will be the result.
 
 This Queryer does XPath querying and then grepping and then trimming,
 in this order.
@@ -266,6 +269,21 @@ Yields::
 
     "hello world!"
 
+Yet another example::
+
+    {
+        "_type": "text",
+        "value": "//a",
+        "attr": "href"
+    }
+
+Applied on::
+
+    <a href="http://anjlab.com">AnjLab</a>
+
+Yields::
+
+    "http://anjlab.com"
 
 int Queryer
 -----------

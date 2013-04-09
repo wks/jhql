@@ -2,9 +2,8 @@ package org.github.wks.jhql;
 
 import java.util.Map;
 
-import junit.framework.Assert;
-
 import org.github.wks.jhql.query.Queryer;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class SingleQueryerTest
